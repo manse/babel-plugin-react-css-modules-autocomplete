@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "ryotamannari",
   "license": "MIT",
-  "icon": "src/128.png",
+  "icon": "icon/128.png",
   "galleryBanner": {
     "color": "#f5da55"
   },

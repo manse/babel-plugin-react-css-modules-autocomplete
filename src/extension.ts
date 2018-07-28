@@ -1,29 +1,94 @@
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
+import { CompletionItem } from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log(
-    'Congratulations, your extension "react-css-modules-autocomplete" is now active!'
-  );
+const SCHEMES = [
+  { language: 'typescriptreact', scheme: 'file' },
+  { language: 'javascriptreact', scheme: 'file' },
+  { language: 'javascript', scheme: 'file' }
+];
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-    // The code you place here will be executed every time your command is executed
-
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World!');
-  });
-
-  context.subscriptions.push(disposable);
+function getImportPaths(source: string) {
+  const reg = /(import\s+|from\s+|require\(\s*)["'](.*?\.(s|pc|sc|c)ss)["']/g;
+  let matched: RegExpExecArray | null;
+  const paths: string[] = [];
+  while ((matched = reg.exec(source))) {
+    paths.push(matched[2]);
+  }
+  return paths;
 }
 
-// this method is called when your extension is deactivated
+function extractStyleNames(css: string): string[] {
+  const reg = /\.(-?[_a-zA-Z]+[_a-zA-Z0-9\-]*)/g;
+  let matched: RegExpExecArray | null;
+  const styleNames: string[] = [];
+  while ((matched = reg.exec(css))) {
+    styleNames.push(matched[1]);
+  }
+  return styleNames.filter((x, i, self) => self.indexOf(x) === i);
+}
+
+async function getDefinitionsAsync(document: vscode.TextDocument) {
+  return await Promise.all(
+    getImportPaths(document.getText()).map(
+      importPath =>
+        new Promise<{ path: string; styleName: string }[]>(resolve => {
+          const fullpath = path.resolve(
+            path.dirname(document.uri.fsPath),
+            importPath
+          );
+          fs.readFile(fullpath, (err, body) => {
+            if (err) {
+              resolve([]);
+            } else {
+              resolve(
+                extractStyleNames(body.toString('utf8')).map(styleName => ({
+                  path: fullpath,
+                  styleName
+                }))
+              );
+            }
+          });
+        })
+    )
+  ).then(pathResults =>
+    pathResults.reduce((acc, results) => [...acc, ...results], [])
+  );
+}
+
+async function provideCompletionItemsWithQuoteAsync(
+  document: vscode.TextDocument,
+  position: vscode.Position
+): Promise<CompletionItem[]> {
+  const line = document.getText(document.lineAt(position).range);
+  const cursorChar = line[position.character - 1];
+  if (cursorChar !== '"' && cursorChar !== "'") return [];
+  const propName = document.getText(
+    new vscode.Range(
+      position.with(undefined, position.character - 11),
+      position.with(undefined, position.character - 2)
+    )
+  );
+  if (propName !== 'styleName') return [];
+  const definitions = await getDefinitionsAsync(document);
+  return definitions.map(
+    def => new CompletionItem(def.styleName, vscode.CompletionItemKind.Variable)
+  );
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      SCHEMES,
+      {
+        provideCompletionItems: provideCompletionItemsWithQuoteAsync
+      },
+      '"',
+      "'"
+    )
+  );
+}
+
 export function deactivate() {}

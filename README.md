@@ -12,12 +12,6 @@ vscode extension for [babel-plugin-react-css-modules](https://github.com/gajus/b
 
 ![2](https://user-images.githubusercontent.com/443965/43359110-079c3b08-92d8-11e8-8654-6c5cfb77b9e3.png)
 
-## Release Notes
-
-### 1.0.0
-
-Initial release
-
 ## License
 
 MIT

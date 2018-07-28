@@ -2,14 +2,25 @@
   "name": "babel-plugin-react-css-modules-autocomplete",
   "displayName": "babel-plugin-react-css-modules-autocomplete",
   "description": "Extension for babel-plugin-react-css-modules",
-  "version": "0.0.1",
-  "publisher": "manse",
+  "version": "1.0.0",
+  "publisher": "ryotamannari",
   "license": "MIT",
+  "icon": "src/128.png",
+  "galleryBanner": {
+    "color": "#f5da55"
+  },
   "engines": {
     "vscode": "^1.25.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "babel",
+    "babel-plugin-react-css-modules",
+    "css-modules",
+    "react-css-modules",
+    "autocomplete"
   ],
   "activationEvents": [
     "onLanguage:typescriptreact",
@@ -31,6 +42,10 @@
     "tslint": "^5.8.0",
     "typescript": "^2.6.1",
     "vscode": "^1.1.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/manse/babel-plugin-react-css-modules-autocomplete.git"
   },
   "prettier": {
     "singleQuote": true,

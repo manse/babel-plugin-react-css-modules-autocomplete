@@ -2,7 +2,7 @@
   "name": "babel-plugin-react-css-modules-autocomplete",
   "displayName": "babel-plugin-react-css-modules-autocomplete",
   "description": "Extension for babel-plugin-react-css-modules",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "ryotamannari",
   "license": "MIT",
   "icon": "icon/128.png",
@@ -45,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/manse/babel-plugin-react-css-modules-autocomplete.git"
+    "url": "https://github.com/manse/babel-plugin-react-css-modules-autocomplete.git"
   },
   "prettier": {
     "singleQuote": true,

@@ -1,21 +1,56 @@
-//
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
-//
-
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
+import { getAllStyleName, getNearestBeginningQuote, isInsideString, isStyleNameValue } from '../extension';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-// import * as vscode from 'vscode';
-// import * as myExtension from '../extension';
-
-// Defines a Mocha test suite to group tests of similar kind together
 suite('Extension Tests', function() {
-  // Defines a Mocha unit test
-  test('Something 1', function() {
-    assert.equal(-1, [1, 2, 3].indexOf(5));
-    assert.equal(-1, [1, 2, 3].indexOf(0));
+  test('test getAllStyleName', function() {
+    assert.equal(
+      'a,b,c,d',
+      getAllStyleName(`.a {}
+    .a, .b,.c:hover {
+        .d {
+          font-size: 10.5px;
+          background: url(dummy.png);
+          background: url('dummy.png');
+          background: url("dummy.png");
+          background: url(dummy.sub.png);
+          background: url('dummy.sub.png');
+          background: url("dummy.sub.png");
+        }
+    }`).join()
+    );
+  });
+
+  test('test isStyleNameValue', function() {
+    assert.equal(true, isStyleNameValue('<div id="val" styleName="foo'));
+    assert.equal(true, isStyleNameValue('<div styleName="foo'));
+    assert.equal(true, isStyleNameValue(`<div styleName='foo`));
+    assert.equal(true, isStyleNameValue('<div styleName=`foo${" bar'));
+    assert.equal(false, isStyleNameValue('<div className="foo'));
+    assert.equal(false, isStyleNameValue(`<div className='foo`));
+    assert.equal(false, isStyleNameValue('<div className=`foo${" bar'));
+  });
+
+  test('test getNearestBeginningQuote', function() {
+    assert.equal('"', getNearestBeginningQuote('<div id="val" styleName="foo'));
+    assert.equal('"', getNearestBeginningQuote('<div styleName="foo'));
+    assert.equal("'", getNearestBeginningQuote(`<div styleName='foo`));
+    assert.equal('"', getNearestBeginningQuote('<div styleName=`foo${" bar'));
+    assert.equal('`', getNearestBeginningQuote('<div styleName=`foo'));
+    assert.equal(null, getNearestBeginningQuote('<div styleName='));
+  });
+
+  test('test isInsideString', function() {
+    assert.equal(true, isInsideString('<div styleName="foo'));
+    assert.equal(true, isInsideString(`<div styleName='foo`));
+    assert.equal(true, isInsideString('<div styleName=`foo'));
+    assert.equal(false, isInsideString('<div styleName="foo"'));
+    assert.equal(false, isInsideString(`<div styleName='foo'`));
+    assert.equal(false, isInsideString('<div styleName=`foo`'));
+    assert.equal(true, isInsideString('<div styleName=`foo${"bar'));
+    assert.equal(false, isInsideString('<div styleName=`foo${"bar"'));
+    assert.equal(true, isInsideString('<div styleName=`foo${"bar"+\'piyo'));
+    assert.equal(false, isInsideString('<div styleName=`foo${"bar"+\'piyo\''));
+    assert.equal(true, isInsideString('<div styleName="foo', '"'));
+    assert.equal(false, isInsideString("<div id='1' styleName=\"foo", "'"));
   });
 });

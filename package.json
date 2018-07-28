@@ -4,6 +4,7 @@
   "description": "Extension for babel-plugin-react-css-modules",
   "version": "0.0.1",
   "publisher": "manse",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.25.0"
   },
@@ -16,14 +17,7 @@
     "onLanguage:javascript"
   ],
   "main": "./out/extension",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.sayHello",
-        "title": "Hello World"
-      }
-    ]
-  },
+  "contributes": {},
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -32,10 +26,14 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.6",
-    "tslint": "^5.8.0",
+    "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
-    "@types/mocha": "^2.2.42"
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1",
+    "vscode": "^1.1.6"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120
   }
 }

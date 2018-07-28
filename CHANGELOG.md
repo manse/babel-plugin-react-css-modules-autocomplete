@@ -1,7 +1,7 @@
 # Change Log
-All notable changes to the "react-css-modules-autocomplete" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+All notable changes to the "babel-plugin-react-css-modules-autocomplete" extension will be documented in this file.
 
-## [Unreleased]
+## [1.0.0]
+
 - Initial release

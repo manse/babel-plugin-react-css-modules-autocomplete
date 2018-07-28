@@ -1,6 +1,6 @@
 {
-  "name": "react-css-modules-autocomplete",
-  "displayName": "react-css-modules-autocomplete",
+  "name": "babel-plugin-react-css-modules-autocomplete",
+  "displayName": "babel-plugin-react-css-modules-autocomplete",
   "description": "Extension for babel-plugin-react-css-modules",
   "version": "0.0.1",
   "publisher": "manse",

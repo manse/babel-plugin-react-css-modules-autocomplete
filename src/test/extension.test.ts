@@ -4,19 +4,27 @@ import { getAllStyleName, getNearestBeginningQuote, isInsideString, isStyleNameV
 suite('Extension Tests', function() {
   test('test getAllStyleName', function() {
     assert.equal(
-      'a,b,c,d',
+      'a,b-b,c,d,e',
       getAllStyleName(`.a {}
-    .a, .b,.c:hover {
+    .a, .b-b,.c:hover {
         .d {
           font-size: 10.5px;
           background: url(dummy.png);
+          background: url(dummy.png );
           background: url('dummy.png');
+          background: url( 'dummy.png' );
+          background: url(  'dummy.png'  );
           background: url("dummy.png");
+          background: url( "dummy.png" );
+          background: url(  "dummy.png"  );
           background: url(dummy.sub.png);
           background: url('dummy.sub.png');
           background: url("dummy.sub.png");
         }
-    }`).join()
+    }
+    .e
+      font-size: 10.5px
+      `).join(',')
     );
   });
 

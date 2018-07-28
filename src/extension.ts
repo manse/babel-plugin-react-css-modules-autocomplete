@@ -15,21 +15,37 @@ const QUOTES = ['"', "'", '`'];
 export function getImportPaths(source: string) {
   const reg = /(import\s+|from\s+|require\(\s*)["'](.*?\.(s|pc|sc|c)ss)["']/g;
   let matched: RegExpExecArray | null;
-  const paths: string[] = [];
+  const paths: {
+    path: string;
+    position: number;
+  }[] = [];
   while ((matched = reg.exec(source))) {
-    paths.push(matched[2]);
+    paths.push({
+      path: matched[2],
+      position: matched.index
+    });
   }
   return paths;
 }
 
-export function getAllStyleName(css: string): string[] {
+export function getAllStyleName(css: string) {
   const reg = /\.(-?[_a-zA-Z]+[_a-zA-Z0-9\-]*)([\w/:%#\$&\?\(\)~\.=\+\-]*[\s"']*?\))?/g;
   let matched: RegExpExecArray | null;
+  const results: {
+    styleName: string;
+    position: number;
+  }[] = [];
   const styleNames: string[] = [];
   while ((matched = reg.exec(css))) {
-    !matched[2] && styleNames.push(matched[1]);
+    const styleName = matched[1];
+    if (matched[2] || styleNames.indexOf(styleName) !== -1) continue;
+    styleNames.push(styleName);
+    results.push({
+      styleName,
+      position: matched.index
+    });
   }
-  return styleNames.filter((x, i, self) => self.indexOf(x) === i);
+  return results;
 }
 
 export function isStyleNameValue(target: string) {
@@ -45,6 +61,18 @@ export function getNearestBeginningQuote(target: string) {
   })).sort((a, b) => (a.position < b.position ? 1 : -1))[0];
   if (result.position === -1) return null;
   return result.quote;
+}
+
+export function getStyleNameAtPoint(target: string, point: number) {
+  const reg = /-?[_a-zA-Z]+[_a-zA-Z0-9\-]*/g;
+  let matched: RegExpExecArray | null;
+  while ((matched = reg.exec(target))) {
+    const styleName = matched[0];
+    if (matched.index <= point && point <= matched.index + styleName.length) {
+      return styleName;
+    }
+  }
+  return null;
 }
 
 export function isInsideString(target: string, char?: string) {
@@ -63,19 +91,38 @@ export function getStyleNames(target: string): string[] {
   return target.substr(propNamePosition).match(/-?[_a-zA-Z]+[_a-zA-Z0-9\-]*/g) || [];
 }
 
+export function findPosition(haystack: string, needle: string): vscode.Position | null {
+  let index = haystack.indexOf(needle);
+  if (index === -1) return null;
+  let line = 0;
+  while (index > 0) {
+    const lineBreak = haystack.indexOf('\n') + 1;
+    if (lineBreak === 0) break;
+    haystack = haystack.substr(lineBreak);
+    if (index < lineBreak) {
+      break;
+    } else {
+      index -= lineBreak;
+      line++;
+    }
+  }
+  return new vscode.Position(line, index);
+}
+
 export async function getDefinitionsAsync(document: vscode.TextDocument) {
   return await Promise.all(
     getImportPaths(document.getText()).map(
       importPath =>
-        new Promise<{ path: string; styleName: string }[]>(resolve => {
-          const fullpath = path.resolve(path.dirname(document.uri.fsPath), importPath);
+        new Promise<{ path: string; styleName: string; position: number }[]>(resolve => {
+          const fullpath = path.resolve(path.dirname(document.uri.fsPath), importPath.path);
           fs.readFile(fullpath, (err, body) =>
             resolve(
               err
                 ? []
-                : getAllStyleName(body.toString('utf8')).map(styleName => ({
+                : getAllStyleName(body.toString('utf8')).map(({ styleName, position }) => ({
                     path: fullpath,
-                    styleName
+                    styleName,
+                    position
                   }))
             )
           );
@@ -115,6 +162,31 @@ async function provideCompletionItemsWithSpaceAsync(
     .map(def => new CompletionItem(def.styleName, vscode.CompletionItemKind.Variable));
 }
 
+async function provideDefinition(
+  document: vscode.TextDocument,
+  position: vscode.Position,
+  _: vscode.CancellationToken
+): Promise<vscode.Location | null> {
+  const line = document.getText(document.lineAt(position).range);
+  const target = line.substr(0, position.character);
+  if (!isStyleNameValue(target)) return null;
+  const styleName = getStyleNameAtPoint(line, position.character);
+  const definitions = await getDefinitionsAsync(document);
+  const definition = definitions.find(def => def.styleName === styleName);
+  if (!definition) return null;
+  return new Promise<vscode.Location | null>(resolve => {
+    fs.readFile(definition.path, (err, data) => {
+      if (!err) {
+        const position = findPosition(data.toString('utf8'), `.${definition.styleName}`);
+        if (position) {
+          return resolve(new vscode.Location(vscode.Uri.file(definition.path), position));
+        }
+      }
+      resolve(null);
+    });
+  });
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
@@ -135,6 +207,11 @@ export function activate(context: vscode.ExtensionContext) {
       },
       ' '
     )
+  );
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(SCHEMES, {
+      provideDefinition
+    })
   );
 }
 

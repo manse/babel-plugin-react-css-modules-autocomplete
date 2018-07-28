@@ -1,5 +1,13 @@
 import * as assert from 'assert';
-import { getAllStyleName, getNearestBeginningQuote, isInsideString, isStyleNameValue } from '../extension';
+import {
+  findPosition,
+  getAllStyleName,
+  getNearestBeginningQuote,
+  getStyleNameAtPoint,
+  getStyleNames,
+  isInsideString,
+  isStyleNameValue
+} from '../extension';
 
 suite('Extension Tests', function() {
   test('test getAllStyleName', function() {
@@ -24,7 +32,9 @@ suite('Extension Tests', function() {
     }
     .e
       font-size: 10.5px
-      `).join(',')
+      `)
+        .map(a => a.styleName)
+        .join(',')
     );
   });
 
@@ -60,5 +70,55 @@ suite('Extension Tests', function() {
     assert.equal(false, isInsideString('<div styleName=`foo${"bar"+\'piyo\''));
     assert.equal(true, isInsideString('<div styleName="foo', '"'));
     assert.equal(false, isInsideString("<div id='1' styleName=\"foo", "'"));
+  });
+
+  test('test getStyleNameAtPoint', function() {
+    assert.equal('foo', getStyleNameAtPoint('foo bar piyo-piyo', 0));
+    assert.equal('foo', getStyleNameAtPoint('foo bar piyo-piyo', 1));
+    assert.equal('foo', getStyleNameAtPoint('foo bar piyo-piyo', 2));
+    assert.equal('foo', getStyleNameAtPoint('foo bar piyo-piyo', 3));
+    assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 4));
+    assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 5));
+    assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 6));
+    assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 7));
+    assert.equal('piyo-piyo', getStyleNameAtPoint('foo bar piyo-piyo', 8));
+  });
+
+  test('test getStyleNames', function() {
+    assert.equal('foo,bar,piyo-piyo,test', getStyleNames('=`foo bar piyo-piyo ${"test"}`').join(','));
+  });
+
+  test('test findPosition', function() {
+    const code = `foo bar
+piyo test`;
+    const pos0 = findPosition(code, 'foo');
+    const pos1 = findPosition(code, 'bar');
+    const pos2 = findPosition(code, 'piyo');
+    const pos3 = findPosition(code, 'test');
+    if (pos0) {
+      assert.equal(0, pos0.line);
+      assert.equal(0, pos0.character);
+    } else {
+      assert.ok(false);
+    }
+    if (pos1) {
+      assert.equal(0, pos1.line);
+      assert.equal(4, pos1.character);
+    } else {
+      assert.ok(false);
+    }
+    if (pos2) {
+      assert.equal(1, pos2.line);
+      assert.equal(0, pos2.character);
+    } else {
+      assert.ok(false);
+    }
+    if (pos3) {
+      assert.equal(1, pos3.line);
+      assert.equal(5, pos3.character);
+    } else {
+      assert.ok(false);
+    }
+    assert.ok(!findPosition(code, 'fuga'));
   });
 });

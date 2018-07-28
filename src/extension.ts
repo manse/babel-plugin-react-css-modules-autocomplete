@@ -91,9 +91,9 @@ export function getStyleNames(target: string): string[] {
   return target.substr(propNamePosition).match(/-?[_a-zA-Z]+[_a-zA-Z0-9\-]*/g) || [];
 }
 
-export function findPosition(haystack: string, needle: string): vscode.Position | null {
+export function findPosition(haystack: string, needle: string): vscode.Position {
   let index = haystack.indexOf(needle);
-  if (index === -1) return null;
+  if (index === -1) return new vscode.Position(0, 0);
   let line = 0;
   while (index > 0) {
     const lineBreak = haystack.indexOf('\n') + 1;
@@ -174,17 +174,18 @@ async function provideDefinition(
   const definitions = await getDefinitionsAsync(document);
   const definition = definitions.find(def => def.styleName === styleName);
   if (!definition) return null;
-  return new Promise<vscode.Location | null>(resolve => {
-    fs.readFile(definition.path, (err, data) => {
-      if (!err) {
-        const position = findPosition(data.toString('utf8'), `.${definition.styleName}`);
-        if (position) {
-          return resolve(new vscode.Location(vscode.Uri.file(definition.path), position));
-        }
-      }
-      resolve(null);
-    });
-  });
+  return new Promise<vscode.Location | null>(resolve =>
+    fs.readFile(definition.path, (err, data) =>
+      resolve(
+        err
+          ? null
+          : new vscode.Location(
+              vscode.Uri.file(definition.path),
+              findPosition(data.toString('utf8'), `.${definition.styleName}`)
+            )
+      )
+    )
+  );
 }
 
 export function activate(context: vscode.ExtensionContext) {

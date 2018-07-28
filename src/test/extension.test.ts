@@ -95,30 +95,16 @@ piyo test`;
     const pos1 = findPosition(code, 'bar');
     const pos2 = findPosition(code, 'piyo');
     const pos3 = findPosition(code, 'test');
-    if (pos0) {
-      assert.equal(0, pos0.line);
-      assert.equal(0, pos0.character);
-    } else {
-      assert.ok(false);
-    }
-    if (pos1) {
-      assert.equal(0, pos1.line);
-      assert.equal(4, pos1.character);
-    } else {
-      assert.ok(false);
-    }
-    if (pos2) {
-      assert.equal(1, pos2.line);
-      assert.equal(0, pos2.character);
-    } else {
-      assert.ok(false);
-    }
-    if (pos3) {
-      assert.equal(1, pos3.line);
-      assert.equal(5, pos3.character);
-    } else {
-      assert.ok(false);
-    }
-    assert.ok(!findPosition(code, 'fuga'));
+    const pos4 = findPosition(code, 'fuga');
+    assert.equal(0, pos0.line);
+    assert.equal(0, pos0.character);
+    assert.equal(0, pos1.line);
+    assert.equal(4, pos1.character);
+    assert.equal(1, pos2.line);
+    assert.equal(0, pos2.character);
+    assert.equal(1, pos3.line);
+    assert.equal(5, pos3.character);
+    assert.equal(0, pos4.line);
+    assert.equal(0, pos4.character);
   });
 });

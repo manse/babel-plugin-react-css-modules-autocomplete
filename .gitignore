@@ -1,0 +1,13 @@
+out
+node_modules
+.vscode-test/
+*.vsix
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+*.log

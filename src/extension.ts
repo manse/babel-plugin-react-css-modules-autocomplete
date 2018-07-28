@@ -20,12 +20,12 @@ function getImportPaths(source: string) {
   return paths;
 }
 
-function extractStyleNames(css: string): string[] {
-  const reg = /\.(-?[_a-zA-Z]+[_a-zA-Z0-9\-]*)/g;
+function getAllStyleName(css: string): string[] {
+  const reg = /\.(-?[_a-zA-Z]+[_a-zA-Z0-9\-]*)([\w/:%#\$&\?\(\)~\.=\+\-]*\s*?\))?/g;
   let matched: RegExpExecArray | null;
   const styleNames: string[] = [];
   while ((matched = reg.exec(css))) {
-    styleNames.push(matched[1]);
+    !matched[2] && styleNames.push(matched[1]);
   }
   return styleNames.filter((x, i, self) => self.indexOf(x) === i);
 }
@@ -39,18 +39,16 @@ async function getDefinitionsAsync(document: vscode.TextDocument) {
             path.dirname(document.uri.fsPath),
             importPath
           );
-          fs.readFile(fullpath, (err, body) => {
-            if (err) {
-              resolve([]);
-            } else {
-              resolve(
-                extractStyleNames(body.toString('utf8')).map(styleName => ({
-                  path: fullpath,
-                  styleName
-                }))
-              );
-            }
-          });
+          fs.readFile(fullpath, (err, body) =>
+            resolve(
+              err
+                ? []
+                : getAllStyleName(body.toString('utf8')).map(styleName => ({
+                    path: fullpath,
+                    styleName
+                  }))
+            )
+          );
         })
     )
   ).then(pathResults =>

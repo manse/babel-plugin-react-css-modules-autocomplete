@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import {
   findPosition,
   getAllStyleName,
+  getImportPaths,
   getNearestBeginningQuote,
   getStyleNameAtPoint,
   getStyleNames,
@@ -10,6 +11,22 @@ import {
 } from '../extension';
 
 suite('Extension Tests', function() {
+  test('test getImportPaths', function() {
+    assert.equal(
+      './a.pcss,./b.scss,./c.css,./d.sss,./e.pcss,./f.pcss',
+      getImportPaths(`
+    import './a.pcss';
+    import   "./b.scss";
+    import * as c from './c.css';
+    import * as d from  "./d.sss";
+    require('./e.pcss');
+    require( "./f.pcss" );
+    `)
+        .map(a => a.path)
+        .join(',')
+    );
+  });
+
   test('test getAllStyleName', function() {
     assert.equal(
       'a,b-b,c,d,e',

@@ -131,28 +131,13 @@ export async function getDefinitionsAsync(document: vscode.TextDocument) {
   ).then(pathResults => pathResults.reduce((acc, results) => [...acc, ...results], []));
 }
 
-export async function provideCompletionItemsWithQuoteAsync(
+export async function provideCompletionItemsAsync(
   document: vscode.TextDocument,
   position: vscode.Position
 ): Promise<CompletionItem[]> {
   const line = document.getText(document.lineAt(position).range);
   const cursorChar = line[position.character - 1];
-  if (cursorChar !== '"' && cursorChar !== "'" && cursorChar !== '`') return [];
-  const target = line.substr(0, position.character);
-  if (!isStyleNameValue(target) || !isInsideString(target, cursorChar)) return [];
-  const definitions = await getDefinitionsAsync(document);
-  const styleNames = getStyleNames(target);
-  return definitions
-    .filter(def => styleNames.indexOf(def.styleName) === -1)
-    .map(def => new CompletionItem(def.styleName, vscode.CompletionItemKind.Variable));
-}
-
-async function provideCompletionItemsWithSpaceAsync(
-  document: vscode.TextDocument,
-  position: vscode.Position
-): Promise<CompletionItem[]> {
-  const line = document.getText(document.lineAt(position).range);
-  if (line[position.character - 1] !== ' ') return [];
+  if (cursorChar !== '"' && cursorChar !== "'" && cursorChar !== '`' && cursorChar !== ' ') return [];
   const target = line.substr(0, position.character);
   if (!isStyleNameValue(target) || !isInsideString(target)) return [];
   const definitions = await getDefinitionsAsync(document);
@@ -193,19 +178,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerCompletionItemProvider(
       SCHEMES,
       {
-        provideCompletionItems: provideCompletionItemsWithQuoteAsync
+        provideCompletionItems: provideCompletionItemsAsync
       },
       '"',
       "'",
-      '`'
-    )
-  );
-  context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      SCHEMES,
-      {
-        provideCompletionItems: provideCompletionItemsWithSpaceAsync
-      },
+      '`',
       ' '
     )
   );

@@ -85,12 +85,6 @@ export function isInsideString(target: string, char?: string) {
   return hits >= 2 && hits % 2 === 0;
 }
 
-export function getStyleNames(target: string): string[] {
-  const propNamePosition = target.lastIndexOf('=');
-  if (propNamePosition === -1) return [];
-  return target.substr(propNamePosition).match(/-?[_a-zA-Z]+[_a-zA-Z0-9\-]*/g) || [];
-}
-
 export function findPosition(haystack: string, needle: string): vscode.Position {
   let index = haystack.indexOf(needle);
   if (index === -1) return new vscode.Position(0, 0);
@@ -141,10 +135,7 @@ export async function provideCompletionItemsAsync(
   const target = line.substr(0, position.character);
   if (!isStyleNameValue(target) || !isInsideString(target)) return [];
   const definitions = await getDefinitionsAsync(document);
-  const styleNames = getStyleNames(target);
-  return definitions
-    .filter(def => styleNames.indexOf(def.styleName) === -1)
-    .map(def => new CompletionItem(def.styleName, vscode.CompletionItemKind.Variable));
+  return definitions.map(def => new CompletionItem(def.styleName, vscode.CompletionItemKind.Variable));
 }
 
 async function provideDefinition(

@@ -5,7 +5,6 @@ import {
   getImportPaths,
   getNearestBeginningQuote,
   getStyleNameAtPoint,
-  getStyleNames,
   isInsideString,
   isStyleNameValue
 } from '../extension';
@@ -99,10 +98,6 @@ suite('Extension Tests', function() {
     assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 6));
     assert.equal('bar', getStyleNameAtPoint('foo bar piyo-piyo', 7));
     assert.equal('piyo-piyo', getStyleNameAtPoint('foo bar piyo-piyo', 8));
-  });
-
-  test('test getStyleNames', function() {
-    assert.equal('foo,bar,piyo-piyo,test', getStyleNames('=`foo bar piyo-piyo ${"test"}`').join(','));
   });
 
   test('test findPosition', function() {

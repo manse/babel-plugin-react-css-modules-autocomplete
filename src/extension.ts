@@ -117,7 +117,14 @@ export async function getDefinitionsAsync(document: vscode.TextDocument) {
             position
           }))
         );
-      }).catch(() => [])
+      }).catch(
+        () =>
+          [] as {
+            path: string;
+            styleName: string;
+            position: number;
+          }[]
+      )
     )
   ).then(pathResults => pathResults.reduce((acc, results) => [...acc, ...results], []));
 }

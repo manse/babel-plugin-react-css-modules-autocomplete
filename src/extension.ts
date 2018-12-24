@@ -109,16 +109,14 @@ export async function getDefinitionsAsync(document: vscode.TextDocument) {
       importPath =>
         new Promise<{ path: string; styleName: string; position: number }[]>(resolve => {
           const fullpath = path.resolve(path.dirname(document.uri.fsPath), importPath.path);
-          fs.readFile(fullpath, (err, body) =>
-            resolve(
-              err
-                ? []
-                : getAllStyleName(body.toString('utf8')).map(({ styleName, position }) => ({
-                    path: fullpath,
-                    styleName,
-                    position
-                  }))
-            )
+          const openedTextDocument = vscode.workspace.textDocuments.find(document => document.uri.fsPath === fullpath);
+          const source = openedTextDocument ? openedTextDocument.getText() : fs.readFileSync(fullpath).toString('utf8');
+          resolve(
+            getAllStyleName(source).map(({ styleName, position }) => ({
+              path: fullpath,
+              styleName,
+              position
+            }))
           );
         })
     )

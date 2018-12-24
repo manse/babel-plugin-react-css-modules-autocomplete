@@ -2,7 +2,7 @@
   "name": "babel-plugin-react-css-modules-autocomplete",
   "displayName": "babel-plugin-react-css-modules-autocomplete",
   "description": "Extension for babel-plugin-react-css-modules",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "ryotamannari",
   "license": "MIT",
   "icon": "icon/128.png",

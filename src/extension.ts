@@ -105,20 +105,19 @@ export function findPosition(haystack: string, needle: string): vscode.Position 
 
 export async function getDefinitionsAsync(document: vscode.TextDocument) {
   return await Promise.all(
-    getImportPaths(document.getText()).map(
-      importPath =>
-        new Promise<{ path: string; styleName: string; position: number }[]>(resolve => {
-          const fullpath = path.resolve(path.dirname(document.uri.fsPath), importPath.path);
-          const openedTextDocument = vscode.workspace.textDocuments.find(document => document.uri.fsPath === fullpath);
-          const source = openedTextDocument ? openedTextDocument.getText() : fs.readFileSync(fullpath).toString('utf8');
-          resolve(
-            getAllStyleName(source).map(({ styleName, position }) => ({
-              path: fullpath,
-              styleName,
-              position
-            }))
-          );
-        })
+    getImportPaths(document.getText()).map(importPath =>
+      new Promise<{ path: string; styleName: string; position: number }[]>(resolve => {
+        const fullpath = path.resolve(path.dirname(document.uri.fsPath), importPath.path);
+        const openedTextDocument = vscode.workspace.textDocuments.find(document => document.uri.fsPath === fullpath);
+        const source = openedTextDocument ? openedTextDocument.getText() : fs.readFileSync(fullpath).toString('utf8');
+        resolve(
+          getAllStyleName(source).map(({ styleName, position }) => ({
+            path: fullpath,
+            styleName,
+            position
+          }))
+        );
+      }).catch(() => [])
     )
   ).then(pathResults => pathResults.reduce((acc, results) => [...acc, ...results], []));
 }

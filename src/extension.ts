@@ -13,7 +13,7 @@ const SCHEMES = [
 const QUOTES = ['"', "'", '`'];
 
 export function getImportPaths(source: string) {
-  const reg = /(import\s+|from\s+|require\(\s*)["'](.*?\.(s|pc|sc|c)ss)["']/g;
+  const reg = /(import\s+|from\s+|require\(\s*)["'](.*?\.(s|pc|sc|c|le)ss)["']/g;
   let matched: RegExpExecArray | null;
   const paths: {
     path: string;

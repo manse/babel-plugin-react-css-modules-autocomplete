@@ -2,6 +2,10 @@
 
 All notable changes to the "babel-plugin-react-css-modules-autocomplete" extension will be documented in this file.
 
+## [1.1.2]
+
+- Add less support
+
 ## [1.1.1]
 
 - Fixed a bug that crashes when file does not exist
